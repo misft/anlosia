@@ -3,14 +3,16 @@ package com.example.anlosia.ui.list.presence
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.anlosia.R
 import com.example.anlosia.model.PresenceResponse
 import kotlinx.android.synthetic.main.item_list_presence.view.*
+import org.w3c.dom.Text
 
 class ListPresenceAdapter(private val dataset: List<PresenceResponse>) :
     RecyclerView.Adapter<ListPresenceAdapter.ListPresenceViewHolder>() {
-    class ListPresenceViewHolder(view: View): RecyclerView.ViewHolder(view)
+    class ListPresenceViewHolder(val view: View): RecyclerView.ViewHolder(view)
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
@@ -21,14 +23,12 @@ class ListPresenceAdapter(private val dataset: List<PresenceResponse>) :
         return ListPresenceViewHolder(view)
     }
 
-    override fun getItemCount(): Int {
-        return dataset.size
+    override fun onBindViewHolder(holder: ListPresenceViewHolder, position: Int) {
+        holder.view.findViewById<TextView>(R.id.date_presence).text = dataset[position].date_presence
+        holder.view.findViewById<TextView>(R.id.start_presence).text = dataset[position].start_presence
+        holder.view.findViewById<TextView>(R.id.end_presence).text = dataset[position].end_presence
     }
 
-    override fun onBindViewHolder(holder: ListPresenceViewHolder, position: Int) {
-        holder.itemView.date_presence.text = dataset[position].date_presence
-        holder.itemView.start_presence.text = dataset[position].start_presence
-        holder.itemView.end_presence.text = dataset[position].end_presence
-    }
+    override fun getItemCount() = dataset.size
 
 }

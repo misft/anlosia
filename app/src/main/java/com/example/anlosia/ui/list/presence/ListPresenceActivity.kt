@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.anlosia.R
+import com.example.anlosia.model.ListPresenceResponse
 import com.example.anlosia.util.Util
 
 class ListPresenceActivity : AppCompatActivity() {
@@ -34,9 +35,8 @@ class ListPresenceActivity : AppCompatActivity() {
             layoutManager = listPresenceLayoutManager
         }
 
-        listPresenceViewModel.getListPresenceResponse().observe(this, Observer {
+        listPresenceViewModel.getListPresenceResponse().observe(this, Observer<ListPresenceResponse> {
             it?.let {
-                Util.logD(it.toString())
                 recyclerView.adapter = ListPresenceAdapter(it.results)
             }
         })
