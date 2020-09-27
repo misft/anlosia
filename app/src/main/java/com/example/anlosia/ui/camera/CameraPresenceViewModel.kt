@@ -56,6 +56,7 @@ class CameraPresenceViewModel : ViewModel() {
                 call: Call<FaceRecognitionResponse>,
                 response: Response<FaceRecognitionResponse>
             ) {
+                Util.logD(response.body().toString())
                 faceRecognitionResponse.value = response.body()
             }
         })
@@ -84,6 +85,7 @@ class CameraPresenceViewModel : ViewModel() {
                 call: Call<PresenceResponse>,
                 response: Response<PresenceResponse>
             ) {
+                Util.logD(response.body().toString())
                 presenceStart.value = response.body()
             }
         })

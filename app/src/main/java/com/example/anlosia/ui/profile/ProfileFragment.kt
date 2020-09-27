@@ -1,6 +1,7 @@
 package com.example.anlosia.ui.profile
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,7 +11,9 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import com.bumptech.glide.Glide
 import com.example.anlosia.R
+import com.example.anlosia.ui.login.LoginActivity
 import kotlinx.android.synthetic.main.fragment_profile.*
 
 class ProfileFragment : Fragment() {
@@ -31,12 +34,18 @@ class ProfileFragment : Fragment() {
             name.text = getString("name", "Anonymous")
             start_work.text = getString("start_work", " ")
             end_work.text = getString("end_work", " ")
+            email.text = getString("email", " ")
+            phone.text = getString("phone", " ")
+            Glide.with(this@ProfileFragment)
+                .load(getString("profile_pic", " "))
+                .into(profile_pic)
         }
         btn_logout.setOnClickListener {
             with(sharedPreferences.edit()) {
                 clear()
                 apply()
             }
+            startActivity(Intent(requireActivity(), LoginActivity::class.java))
         }
     }
 }

@@ -11,7 +11,7 @@ interface ApiService {
     @POST("presence/")
     fun postPresenceStart(@Body body: RequestBody): Call<PresenceResponse>
 
-    @PUT("presence/{id}")
+    @PUT("presence/{id}/")
     fun postPresenceEnd(
         @Path("id") id: Int,
         @Body body: RequestBody
@@ -23,7 +23,7 @@ interface ApiService {
         @Part body: MultipartBody.Part
     ) : Call<UploadResponse>
 
-    @POST("facerecognition/")
+    @GET("facerecognition/")
     fun postFaceRecognition(): Call<FaceRecognitionResponse>
 
     @POST("location/")

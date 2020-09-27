@@ -37,6 +37,7 @@ class LoginActivity : AppCompatActivity() {
 
         //Inflate layout
         super.onCreate(savedInstanceState)
+        supportActionBar?.hide();
         setContentView(R.layout.activity_login)
 
         //Get UI to interact later
@@ -48,10 +49,6 @@ class LoginActivity : AppCompatActivity() {
             this,
             ViewModelProvider.NewInstanceFactory()
         )[HomeViewModel::class.java]
-
-        //Delete this later on prod
-        username.setText("ganu")
-        password.setText("ganu")
 
         //Set login button on click event
         loginButton.setOnClickListener {
@@ -91,6 +88,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private val loginObserver = Observer<LoginResponse> {
+        Util.logD(it?.toString())
         it?.let {
             if (it.api_status == 0) {
                 Toast.makeText(this, "Username atau password anda salah", Toast.LENGTH_SHORT)
@@ -105,6 +103,9 @@ class LoginActivity : AppCompatActivity() {
                     putInt("id", data.id)
                     putInt("id_company", data.users__id_company)
                     putString("name", data.users__name)
+                    putString("email", data.email)
+                    putString("phone", data.users__telp)
+                    putString("profile_pic", "https://anlosia.xyz/media/" + data.users__profile_pic)
                     putString("start_work", data.users__start_work)
                     putString("end_work", data.users__end_work)
                     putString("location", data.users__location)

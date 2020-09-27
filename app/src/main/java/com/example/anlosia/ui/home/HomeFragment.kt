@@ -36,16 +36,16 @@ class HomeFragment : Fragment() {
 
         val sdf = SimpleDateFormat("HH:mm")
         val now: Date = sdf.parse(sdf.format(Calendar.getInstance().time))
-        val startWork: Date = sdf.parse(sharedPref.all["start_work"].toString())
-        val endWork: Date = sdf.parse(sharedPref.all["end_work"].toString())
-        val isPresenced : Int = sharedPref.all["is_presenced"].toString().toInt()
+        val startWork: Date = sdf.parse(sharedPref.getString("start_work", " "))
+        val endWork: Date = sdf.parse(sharedPref.getString("end_work", " "))
+        val isPresenced : Int = sharedPref.getInt("is_presenced", 0)
 
         sharedPref.registerOnSharedPreferenceChangeListener(listener)
         childFragmentManager.commit {
             if(isPresenced == 1) {
                 replace<HomePresenceStatusPresencedFragment>(R.id.presence_status_fragment, null)
             }
-            else if(now.before(endWork) && isPresenced != 1) {
+            else if(now.before(endWork) && isPresenced == 0) {
                 replace<HomePresenceStatusFragment>(R.id.presence_status_fragment, null)
             }
             if(now.after(endWork)) {

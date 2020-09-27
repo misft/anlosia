@@ -43,19 +43,6 @@ class HomePresenceStatusPresencedFragment : Fragment() {
         //Get sharedPref instance
         sharedPref = requireActivity().getSharedPreferences("user", Context.MODE_PRIVATE)
 
-        presenceEndViewModel.getPresence().observe(requireActivity(), Observer<PresenceResponse> {
-            it?.let {
-                btn_presence_end.isEnabled = false
-                btn_presence_end.setBackgroundResource(R.drawable.presence_button_disabled)
-
-                requireActivity().stopService(Intent(requireActivity(), PresenceStart::class.java))
-
-                parentFragmentManager.commit {
-                    replace<HomePresenceStatusEndFragment>(R.id.presence_status_fragment)
-                }
-            }
-        })
-
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_home_presence_status_presenced, container, false)
     }
@@ -63,6 +50,21 @@ class HomePresenceStatusPresencedFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val sharedPref = requireActivity().getSharedPreferences("user", Context.MODE_PRIVATE)
+
+        presenceEndViewModel.getPresence().observe(requireActivity(), Observer<PresenceResponse> {
+            it?.let {
+                btn_presence_end.isEnabled = false
+                btn_presence_end.setBackgroundResource(R.drawable.presence_button_disabled)
+
+                requireActivity().stopService(Intent(requireActivity(), PresenceStart::class.java))
+                sharedPref.edit().remove("is_presenced")
+                sharedPref.edit().remove("id_presence")
+
+                parentFragmentManager.commit {
+                    replace<HomePresenceStatusEndFragment>(R.id.presence_status_fragment)
+                }
+            }
+        })
 
         btn_presence_end.setOnClickListener {
             val id_presence = sharedPref.getInt("id_presence", 0)

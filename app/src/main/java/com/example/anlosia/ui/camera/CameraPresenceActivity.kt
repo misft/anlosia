@@ -46,11 +46,13 @@ class CameraPresenceActivity : AppCompatActivity() {
     private lateinit var cameraExecutor: ExecutorService
 
     private var cameraPresenceViewModel = CameraPresenceViewModel()
+    private lateinit var client: FusedLocationProviderClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera_presence)
 
+        client = LocationServices.getFusedLocationProviderClient(applicationContext)
         // Request camera permissions
         if (allPermissionsGranted()) {
             startCamera()
@@ -68,11 +70,7 @@ class CameraPresenceActivity : AppCompatActivity() {
         val start_presence = SimpleDateFormat("HH:mm:ss").format(Date().time)
 
         val faceRecognitionObserver = Observer<FaceRecognitionResponse> {
-            Util.logD("Ayy ${it.toString()}")
             it?.let {
-                Util.logD("Recognized")
-
-                val client = LocationServices.getFusedLocationProviderClient(applicationContext)
                 if (ActivityCompat.checkSelfPermission(
                         this,
                         Manifest.permission.ACCESS_FINE_LOCATION
@@ -83,7 +81,6 @@ class CameraPresenceActivity : AppCompatActivity() {
                 ) {
                     client.lastLocation.addOnSuccessListener {
                         val loc = Location(it.latitude, it.longitude)
-
                         var polygon: Array<Array<Double>?> = arrayOf()
                         val sharedPreferences =
                             applicationContext.getSharedPreferences("user", Context.MODE_PRIVATE)
@@ -99,8 +96,8 @@ class CameraPresenceActivity : AppCompatActivity() {
                                 arrayOf(latlng[0].toDouble(), latlng[1].toDouble())
                             )
                         }
-
                         val isInside = Util.isInsidePolygon(loc, polygon)
+                        Util.logD(isInside.toString())
                     }
                 }
                 cameraPresenceViewModel.postPresenceStart(id_user, id_company, date_presence, start_presence)
@@ -108,12 +105,11 @@ class CameraPresenceActivity : AppCompatActivity() {
         }
 
         val presenceStartObserver = Observer<PresenceResponse> {
-            Util.logD(it.start_presence)
             it?.let {
                 val sharedPreferences = this.getSharedPreferences("user", Context.MODE_PRIVATE)
                 with (sharedPreferences.edit()) {
                     putInt("id_presence", it.id)
-                    putBoolean("is_presenced", true)
+                    putInt("is_presenced", 1)
 
                     apply()
                 }
@@ -196,30 +192,9 @@ class CameraPresenceActivity : AppCompatActivity() {
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     val savedUri = Uri.fromFile(photoFile)
-                    val location = getLocation()
                     cameraPresenceViewModel.postUploadFile(photoFile)
                 }
             })
-    }
-
-    private fun getLocation(): Location? {
-        val locationClient : FusedLocationProviderClient = FusedLocationProviderClient(applicationContext)
-        val location : MutableLiveData<Location> = MutableLiveData()
-
-        if (ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                this,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            locationClient.lastLocation.addOnSuccessListener {
-                location.value = locationClient.lastLocation.result as Location?
-            }
-        }
-
-        return location.value
     }
 
     private fun allPermissionsGranted() = false

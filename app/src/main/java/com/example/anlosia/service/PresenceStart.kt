@@ -97,7 +97,7 @@ class PresenceStart() : LifecycleService() {
                 ) {
                     var polygon: Array<Array<Double>?> = arrayOf()
                     val sharedPreferences = applicationContext.getSharedPreferences("user", Context.MODE_PRIVATE)
-                    var location = sharedPreferences.all["location"].toString()
+                    var location = sharedPreferences.getString("location", " ")!!
                     location = location.replace("],[", "|")
                     location = location.replace("[[", "")
                     location = location.replace("]]", "")
