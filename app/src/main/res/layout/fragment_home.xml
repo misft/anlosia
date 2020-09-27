@@ -52,12 +52,19 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginVertical="50dp"/>
-    <TextView
-        android:id="@+id/tx_list_presence"
-        android:layout_width="wrap_content"
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto_thin"
-        android:textColor="@color/colorPrimary"
-        android:text="Lihat daftar presensi"/>
+        android:layout_marginVertical="10dp"
+        android:gravity="center">
+        <TextView
+            android:id="@+id/tx_list_presence"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="@font/roboto_thin"
+            android:textColor="@color/colorPrimary"
+            android:text="Lihat daftar presensi"/>
+    </LinearLayout>
 
 </LinearLayout>
