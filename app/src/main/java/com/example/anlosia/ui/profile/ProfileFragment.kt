@@ -14,36 +14,29 @@ import com.example.anlosia.R
 import kotlinx.android.synthetic.main.fragment_profile.*
 
 class ProfileFragment : Fragment() {
-
-    private lateinit var dashboardViewModel: ProfileViewModel
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreateView(
             inflater: LayoutInflater,
             container: ViewGroup?,
             savedInstanceState: Bundle?
     ): View? {
-        dashboardViewModel =
-                ViewModelProviders.of(this).get(ProfileViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_profile, container, false)
-        val textView: TextView = root.findViewById(R.id.text_dashboard)
-        dashboardViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
-
-        return root
+        sharedPreferences = requireActivity().getSharedPreferences("user", Context.MODE_PRIVATE)
+        return inflater.inflate(R.layout.fragment_profile, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        with(sharedPreferences) {
+            name.text = getString("name", "Anonymous")
+            start_work.text = getString("start_work", " ")
+            end_work.text = getString("end_work", " ")
+        }
         btn_logout.setOnClickListener {
-            val sharedPref = activity?.getPreferences(Context.MODE_PRIVATE)
-            val editor : SharedPreferences.Editor = sharedPref!!.edit()
-
-            editor.remove("user_id")
-            editor.remove("user_username")
-            editor.remove("user_location")
-
-            editor.apply()
+            with(sharedPreferences.edit()) {
+                clear()
+                apply()
+            }
         }
     }
 }

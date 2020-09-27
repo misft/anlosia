@@ -5,7 +5,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center">
-
     <Button
         android:id="@+id/btn_presence_end"
         android:layout_width="175dp"

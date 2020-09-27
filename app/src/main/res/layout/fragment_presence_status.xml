@@ -5,7 +5,6 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center">
-
     <Button
         android:id="@+id/btn_presence_start"
         android:layout_width="175dp"
@@ -14,20 +13,5 @@
         android:fontFamily="@font/roboto_light"
         android:text="Mulai Presensi"
         android:textAllCaps="false"
-        android:textColor="@color/text_light"></Button>
-
-    <TextView
-        android:id="@+id/presence_clock_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto_light"
-        android:text="-00.15"
-        android:textColor="@color/text_red"></TextView>
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:fontFamily="@font/roboto_thin"
-        android:text="Kantor"
-        android:textColor="@color/text_dark"></TextView>
+        android:textColor="@color/text_light" />
 </LinearLayout>

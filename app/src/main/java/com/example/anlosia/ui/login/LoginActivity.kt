@@ -104,6 +104,7 @@ class LoginActivity : AppCompatActivity() {
                 with(sharedPref.edit()) {
                     putInt("id", data.id)
                     putInt("id_company", data.users__id_company)
+                    putString("name", data.users__name)
                     putString("start_work", data.users__start_work)
                     putString("end_work", data.users__end_work)
                     putString("location", data.users__location)

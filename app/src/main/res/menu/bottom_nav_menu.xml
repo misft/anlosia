@@ -3,16 +3,16 @@
 
     <item
         android:id="@+id/navigation_home"
-        android:title="Presence"
+        android:title="Presensi"
         android:icon="@drawable/ic_presence_nav"/>
 
     <item
         android:id="@+id/navigation_notifications"
-        android:title="Vacation"
+        android:title="Cuti"
         android:icon="@drawable/ic_vacation_nav"/>
     <item
         android:id="@+id/navigation_dashboard"
-        android:title="Profile"
+        android:title="Profil"
         android:icon="@drawable/ic_profile_nav"/>
 
 </menu>
