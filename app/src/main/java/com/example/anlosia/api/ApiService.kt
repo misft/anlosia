@@ -35,4 +35,7 @@ interface ApiService {
     @GET("vacation")
     fun getListVacation(@Query("id_user") id: Int): Call<ListVacationResponse>
 
+    @GET("presence/")
+    fun getListPresence(@Query("id_user") id: Int) : Call<ListPresenceResponse>
+
 }

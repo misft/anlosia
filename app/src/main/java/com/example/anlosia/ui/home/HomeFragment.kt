@@ -1,6 +1,7 @@
 package com.example.anlosia.ui.home
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -10,6 +11,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.*
 import androidx.lifecycle.ViewModelProvider
 import com.example.anlosia.R
+import com.example.anlosia.ui.list.presence.ListPresenceActivity
 import com.example.anlosia.util.Util
 import com.example.anlosia.viewmodel.PresenceStartViewModel
 import kotlinx.android.synthetic.main.fragment_home.*
@@ -58,6 +60,10 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         presence_date.text =  getCurrentDate()
+
+        tx_list_presence.setOnClickListener {
+            startActivity(Intent(requireActivity(), ListPresenceActivity::class.java))
+        }
     }
 
     fun getCurrentDate(): String {
