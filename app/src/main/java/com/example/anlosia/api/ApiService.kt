@@ -32,7 +32,7 @@ interface ApiService {
     @POST("vacation/")
     fun postVacation(@Body body: RequestBody): Call<VacationResponse>
 
-    @GET("vacation/{id}")
-    fun getListVacation(@Path("id") id: Int): Call<ListVacationResponse>
+    @GET("vacation")
+    fun getListVacation(@Query("id_user") id: Int): Call<ListVacationResponse>
 
 }

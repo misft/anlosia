@@ -3,8 +3,12 @@ package com.example.anlosia.util
 import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
+import android.os.Build.ID
 import android.util.Log
 import com.example.anlosia.model.Location
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.*
 
 object Util {
     fun isMyServiceRunning(serviceClass: Class<*>, mActivity: Activity): Boolean {
@@ -56,6 +60,48 @@ object Util {
         }
 
         return inside;
+    }
+
+    fun dateYMDtoIndo(date: String): String {
+        val _date = date.split("-")
+        logD(_date.toString())
+        val year = _date[0]
+        val month = parseMonthToString(_date[1])
+        val day = parseDayToString(date)
+
+        return "${day} ${month} ${year}"
+    }
+
+    fun parseMonthToString(month: String): String {
+        if(month == "01") return "Januari"
+        else if(month == "02") return "February"
+        else if(month == "03") return "Maret"
+        else if(month == "04") return "April"
+        else if(month == "05") return "Mei"
+        else if(month == "06") return "Juni"
+        else if(month == "07") return "Juli"
+        else if(month == "08") return "Agustus"
+        else if(month == "09") return "September"
+        else if(month == "10") return "Oktober"
+        else if(month == "11") return "November"
+        else if(month == "12") return "December"
+        else return month
+    }
+
+    fun parseDayToString(date: String): String {
+        val sdf = SimpleDateFormat("EEEE")
+        val _date = SimpleDateFormat("YYYY-M-d").parse(date)
+        val day: String = sdf.format(_date)
+
+        if(day == "Monday") return "Senin"
+        else if(day == "Tuesday") return "Selasa"
+        else if(day == "Wednesday") return "Rabu"
+        else if(day == "Thursday") return "Kamis"
+        else if(day == "Friday") return "Jumat"
+        else if(day == "Saturday") return "Sabtu"
+        else if(day == "Sunday") return "Minggu"
+
+        return day
     }
 
     fun logD(text: String?) {
