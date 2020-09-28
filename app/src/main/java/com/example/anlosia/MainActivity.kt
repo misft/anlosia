@@ -4,24 +4,21 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.location.Location
 import android.os.Bundle
-import android.util.Log
-import android.view.Window
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.Observer
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
-import com.example.anlosia.model.RecordLocationResponse
 import com.example.anlosia.service.PresenceStart
 import com.example.anlosia.ui.login.LoginActivity
 import com.example.anlosia.util.Util
-import com.example.anlosia.viewmodel.LocationViewModel
-import com.google.android.gms.location.*
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.LatLng
+import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.maps.android.PolyUtil
 
 class MainActivity : AppCompatActivity() {
     private val locationService = PresenceStart()
@@ -42,17 +39,31 @@ class MainActivity : AppCompatActivity() {
 
         val client: FusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this)
 
-        var location : Location? = null
         val permission = ContextCompat.checkSelfPermission(
             this,
             Manifest.permission.ACCESS_FINE_LOCATION
         )
         if (permission == PackageManager.PERMISSION_GRANTED) {
-            client.requestLocationUpdates(LocationRequest(), object : LocationCallback() {
-                override fun onLocationResult(locationResult: LocationResult) {
-                    location = locationResult.lastLocation
+            client.lastLocation.addOnSuccessListener {currentLocation ->
+                var polygon = mutableListOf<LatLng>()
+                val sharedPreferences = applicationContext.getSharedPreferences("user", Context.MODE_PRIVATE)
+                var location = sharedPreferences.getString("location", " ")!!
+                location = location.replace("],[", "|")
+                location = location.replace("[[", "")
+                location = location.replace("]]", "")
+                var n = 0
+                Util.logD(location)
+                location.split("|").forEach {
+                    var latlng = it.split(",")
+                    polygon.add(LatLng(latlng[0].toDouble(), latlng[1].toDouble()))
                 }
-            }, null)
+                currentLocation?.let {
+                    val point = LatLng(currentLocation.latitude, currentLocation.longitude)
+                    Util.logD(currentLocation.latitude.toString())
+                    Util.logD(currentLocation.longitude.toString())
+                    Util.logD(PolyUtil.containsLocation(point, polygon, true).toString())
+                }
+            }
         }
     }
 
@@ -60,24 +71,6 @@ class MainActivity : AppCompatActivity() {
         if (!Util.isUserLoggedIn(this)) {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
-        }
-    }
-
-    override fun onRequestPermissionsResult(
-        requestCode: Int,
-        permissions: Array<out String>,
-        grantResults: IntArray
-    ) {
-        if(requestCode == 1) {
-            val locationViewModel = LocationViewModel()
-            locationViewModel.getRecordLocation().observe(this, Observer<RecordLocationResponse>() {
-                if(it != null) {
-                    Log.d("Location update", it.toString())
-                }
-                else {
-                    Log.d("Location update", it.toString())
-                }
-            })
         }
     }
 }

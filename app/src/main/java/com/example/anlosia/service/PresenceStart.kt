@@ -14,7 +14,6 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.*
-import com.example.anlosia.R
 import com.example.anlosia.repositories.RecordLocationRepo
 import com.example.anlosia.util.Util
 import com.example.anlosia.viewmodel.LocationViewModel

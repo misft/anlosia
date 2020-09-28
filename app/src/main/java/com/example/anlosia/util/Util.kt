@@ -3,12 +3,9 @@ package com.example.anlosia.util
 import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
-import android.os.Build.ID
 import android.util.Log
 import com.example.anlosia.model.Location
-import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.util.*
 
 object Util {
     fun isMyServiceRunning(serviceClass: Class<*>, mActivity: Activity): Boolean {
