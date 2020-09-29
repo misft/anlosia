@@ -13,18 +13,8 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:padding="25dp"
-        app:layout_constraintBottom_toBottomOf="@+id/username"
-        app:layout_constraintTop_toTopOf="@+id/progress_bar">
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:orientation="vertical"
         android:layout_marginVertical="15dp">
-
         <EditText
             android:id="@+id/username"
             android:layout_width="match_parent"
@@ -33,10 +23,10 @@
             android:layout_marginEnd="24dp"
             android:fontFamily="@font/roboto_light"
             android:hint="Username"
-            android:inputType="textAutoComplete"
-            android:selectAllOnFocus="true"
-            android:layout_marginVertical="10dp"/>
-
+            android:layout_marginVertical="10dp"
+            android:maxLines="1"
+            android:inputType="text"
+            android:nextFocusForward="@id/password"/>
         <EditText
             android:id="@+id/password"
             android:layout_width="match_parent"
@@ -46,10 +36,10 @@
             android:layout_marginEnd="24dp"
             android:fontFamily="@font/roboto_light"
             android:hint="@string/prompt_password"
-            android:imeOptions="actionDone"
             android:inputType="textPassword"
-            android:selectAllOnFocus="true"
-            android:layout_marginVertical="10dp"/>
+            android:maxLines="1"
+            android:layout_marginVertical="10dp"
+            android:nextFocusForward="@id/btnLogin"/>
     </LinearLayout>
 
     <LinearLayout
@@ -68,19 +58,4 @@
             android:textAllCaps="false"
             android:textColor="@color/text_white" />
     </LinearLayout>
-
-    <RelativeLayout
-        android:id="@+id/progress_bar"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="#90000000"
-        android:translationZ="30dp"
-        android:visibility="invisible">
-
-        <ProgressBar
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:layout_centerInParent="true"
-            android:progressTint="#491616" />
-    </RelativeLayout>
 </LinearLayout>

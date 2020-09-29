@@ -42,7 +42,6 @@ class VacationViewModel : ViewModel() {
                 call: Call<VacationResponse>,
                 response: Response<VacationResponse>
             ) {
-                Util.logD(response.raw().message())
                 vacationResponse.value = response.body()
             }
         })

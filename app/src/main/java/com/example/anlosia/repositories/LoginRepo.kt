@@ -12,17 +12,10 @@ import retrofit2.Call
 import retrofit2.Response
 import java.util.*
 
-class LoginRepo : AsyncTask<String, Void, LoginResponse>() {
+class LoginRepo {
     val apiClient: ApiClient = ApiClient()
 
-    override fun doInBackground(vararg params: String): LoginResponse? {
-        val body : RequestBody = MultipartBody.Builder()
-            .setType(MultipartBody.FORM)
-            .addFormDataPart("username", params[0])
-            .addFormDataPart("password", params[0])
-            .build()
-        val call: Response<LoginResponse> = apiClient.callApi().postLogin(body).execute()
-        val response: LoginResponse? = call.body()
-        return response
+    fun postLogin(body: RequestBody): Call<LoginResponse> {
+        return apiClient.callApi().postLogin(body)
     }
 }

@@ -5,6 +5,7 @@ import com.example.anlosia.model.FaceRecognitionResponse
 import com.example.anlosia.model.PresenceResponse
 import com.example.anlosia.model.UploadResponse
 import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import retrofit2.Call
@@ -16,7 +17,7 @@ class PresenceStartRepo() {
 
     fun postUploadFile(file: File): Call<UploadResponse> {
         val requestFile =
-            RequestBody.create(MediaType.parse("multipart/form-data"), file)
+            RequestBody.create("multipart/form-data".toMediaTypeOrNull(), file)
         val body =
             MultipartBody.Part.createFormData("image", file.name, requestFile)
 

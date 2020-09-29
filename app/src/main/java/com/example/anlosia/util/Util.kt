@@ -6,6 +6,7 @@ import android.content.Context
 import android.util.Log
 import com.example.anlosia.model.Location
 import java.text.SimpleDateFormat
+import java.util.*
 
 object Util {
     fun isMyServiceRunning(serviceClass: Class<*>, mActivity: Activity): Boolean {
@@ -21,8 +22,8 @@ object Util {
         return false
     }
 
-    fun isUserLoggedIn(activity: Activity) : Boolean {
-        val sharedPref = activity.getSharedPreferences("user", Context.MODE_PRIVATE)
+    fun isUserLoggedIn(context: Context) : Boolean {
+        val sharedPref = context.getSharedPreferences("user", Context.MODE_PRIVATE)
 
         if(sharedPref.all["id"] == null) {
             return false
@@ -99,6 +100,31 @@ object Util {
         else if(day == "Sunday") return "Minggu"
 
         return day
+    }
+
+    fun getCurrentDate(): String {
+        val currentDate = SimpleDateFormat("dd MM YYYY").format(Calendar.getInstance().time)
+        val _dateSplit: Array<String> = currentDate.split(" ").toTypedArray();
+        _dateSplit[1] = parseMonth(_dateSplit)
+
+        return _dateSplit.joinToString(" ")
+    }
+
+    fun parseMonth(dateSplit : Array<String>) : String {
+        if(dateSplit[1] == "01") return "Januari"
+        else if(dateSplit[1] == "02") return "Februari"
+        else if(dateSplit[1] == "03") return "Maret"
+        else if(dateSplit[1] == "04") return "April"
+        else if(dateSplit[1] == "05") return "Mei"
+        else if(dateSplit[1] == "06") return "Juni"
+        else if(dateSplit[1] == "07") return "Juli"
+        else if(dateSplit[1] == "08") return "Agustus"
+        else if(dateSplit[1] == "09") return "September"
+        else if(dateSplit[1] == "10") return "Oktober"
+        else if(dateSplit[1] == "11") return "November"
+        else if(dateSplit[1] == "12") return "Desember"
+        else
+            return "January"
     }
 
     fun logD(text: String?) {

@@ -68,7 +68,7 @@ class CameraPresenceViewModel : ViewModel() {
         return presenceStart
     }
 
-    fun postPresenceStart(id_user: Int, id_company: Int, date_presence: String?, start_presence: String?) {
+    fun postPresenceStart(id_user: Int, id_company: Int, date_presence: String, start_presence: String) {
         val body: RequestBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addFormDataPart("id_user", id_user.toString())
