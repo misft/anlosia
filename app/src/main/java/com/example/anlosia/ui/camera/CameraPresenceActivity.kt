@@ -5,10 +5,13 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.util.Size
+import android.util.SparseArray
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
@@ -20,11 +23,15 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.anlosia.MainActivity
 import com.example.anlosia.R
 import com.example.anlosia.model.FaceRecognitionResponse
-import com.example.anlosia.model.Location
 import com.example.anlosia.model.PresenceResponse
+import com.example.anlosia.model.UploadResponse
 import com.example.anlosia.util.Util
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.vision.Frame
+import com.google.android.gms.vision.face.Face
+import com.google.android.gms.vision.face.FaceDetector
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.android.synthetic.main.activity_camera_presence.*
 import java.io.File
 import java.text.SimpleDateFormat
@@ -47,11 +54,15 @@ class CameraPresenceActivity : AppCompatActivity() {
     private var cameraPresenceViewModel = CameraPresenceViewModel()
     private lateinit var client: FusedLocationProviderClient
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    private lateinit var dialog: BottomSheetDialog
+
+    override fun onCreate(savedInstanceState:  Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera_presence)
 
         client = LocationServices.getFusedLocationProviderClient(applicationContext)
+        dialog = BottomSheetDialog(this)
+
         // Request camera permissions
         if (allPermissionsGranted()) {
             startCamera()
@@ -68,37 +79,17 @@ class CameraPresenceActivity : AppCompatActivity() {
         val date_presence = SimpleDateFormat("YYYY-MM-dd").format(Date().time)
         val start_presence = SimpleDateFormat("HH:mm:ss").format(Date().time)
 
+        val uploadPhotoObserver = Observer<UploadResponse> {
+            val dialogSheet = layoutInflater.inflate(R.layout.dialog_face_recognition,null)
+            dialog.setContentView(dialogSheet)
+            dialog.show()
+            cameraPresenceViewModel.postFaceRecognition()
+        }
         val faceRecognitionObserver = Observer<FaceRecognitionResponse> {
             it?.let {
-                if (ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    ) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                        this,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                    ) == PackageManager.PERMISSION_GRANTED
-                ) {
-                    client.lastLocation.addOnSuccessListener {
-                        val loc = Location(it.latitude, it.longitude)
-                        var polygon: Array<Array<Double>?> = arrayOf()
-                        val sharedPreferences =
-                            applicationContext.getSharedPreferences("user", Context.MODE_PRIVATE)
-                        var companyLocation = sharedPreferences.all["location"].toString()
-                        companyLocation = companyLocation.replace("],[", "|")
-                        companyLocation = companyLocation.replace("[[", "")
-                        companyLocation = companyLocation.replace("]]", "")
-                        var n = 0
-                        companyLocation.split("|").forEach {
-                            var latlng = it.split(",")
-                            polygon = Util.append(
-                                polygon,
-                                arrayOf(latlng[0].toDouble(), latlng[1].toDouble())
-                            )
-                        }
-                        val isInside = Util.isInsidePolygon(loc, polygon)
-                        Util.logD(isInside.toString())
-                    }
-                }
+                val dialogSheet = layoutInflater.inflate(R.layout.dialog_presence_start,null)
+                dialog.setContentView(dialogSheet)
+                dialog.show()
                 cameraPresenceViewModel.postPresenceStart(id_user, id_company, date_presence, start_presence)
             }
         }
@@ -120,6 +111,7 @@ class CameraPresenceActivity : AppCompatActivity() {
         //Initiate view model
         cameraPresenceViewModel = ViewModelProvider(this, ViewModelProvider.NewInstanceFactory())[CameraPresenceViewModel::class.java]
 
+        cameraPresenceViewModel.getUploadPhotoResponse().observe(this, uploadPhotoObserver)
         cameraPresenceViewModel.getFaceRecognitionResponse().observe(this, faceRecognitionObserver)
         cameraPresenceViewModel.getPresenceStart().observe(this, presenceStartObserver)
 
@@ -191,6 +183,23 @@ class CameraPresenceActivity : AppCompatActivity() {
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     val savedUri = Uri.fromFile(photoFile)
+
+                    val bitmap: Bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
+
+                    val detector : FaceDetector = FaceDetector.Builder(applicationContext)
+                        .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
+                        .setTrackingEnabled(false)
+                        .setLandmarkType(FaceDetector.ALL_LANDMARKS)
+                        .build()
+                    val frame: Frame = Frame.Builder().setBitmap(bitmap).build()
+                    val faces:SparseArray<Face> = detector.detect(frame)
+                    detector.release()
+                    val detectedFace: Float = faces[0].isRightEyeOpenProbability
+
+                    Util.logD(detectedFace.toString())
+                    val dialogSheet = layoutInflater.inflate(R.layout.dialog_upload_photo,null)
+                    dialog.setContentView(dialogSheet)
+                    dialog.show()
                     cameraPresenceViewModel.postUploadFile(photoFile)
                 }
             })

@@ -21,7 +21,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Mengupload foto..."
+            android:text="Mengidentifikasi wajah..."
             android:fontFamily="@font/roboto_light"
             android:textColor="@color/colorPrimaryDark"/>
     </LinearLayout>

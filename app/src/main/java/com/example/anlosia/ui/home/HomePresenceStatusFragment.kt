@@ -13,6 +13,7 @@ import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import com.example.anlosia.R
 import com.example.anlosia.ui.camera.CameraPresenceActivity
+import com.example.anlosia.util.Util
 import com.example.anlosia.viewmodel.PresenceStartViewModel
 import kotlinx.android.synthetic.main.fragment_presence_status.*
 
@@ -39,7 +40,13 @@ class HomePresenceStatusFragment : Fragment() {
         val sharedPref = requireActivity().getSharedPreferences("user", Context.MODE_PRIVATE)!!
 
         val manager = requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        if (!manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
+
+        if (!manager.isProviderEnabled( LocationManager.GPS_PROVIDER)) {
+            parentFragmentManager.commit {
+                replace<HomePresenceStatusDisabledFragment>(R.id.presence_status_fragment)
+            }
+        }
+        else if(!sharedPref.getBoolean("is_inside", false)) {
             parentFragmentManager.commit {
                 replace<HomePresenceStatusDisabledFragment>(R.id.presence_status_fragment)
             }
@@ -48,12 +55,6 @@ class HomePresenceStatusFragment : Fragment() {
         if(sharedPref.all["is_presenced"] == 1)  {
             parentFragmentManager.commit {
                 replace<HomePresenceStatusPresencedFragment>(R.id.presence_status_fragment)
-            }
-        }
-
-        if(!sharedPref.getBoolean("is_inside", false)) {
-            parentFragmentManager.commit {
-                replace<HomePresenceStatusDisabledFragment>(R.id.presence_status_fragment)
             }
         }
 

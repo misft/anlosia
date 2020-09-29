@@ -57,8 +57,12 @@ class HomePresenceStatusPresencedFragment : Fragment() {
                 btn_presence_end.setBackgroundResource(R.drawable.presence_button_disabled)
 
                 requireActivity().stopService(Intent(requireActivity(), PresenceStart::class.java))
-                sharedPref.edit().remove("is_presenced")
-                sharedPref.edit().remove("id_presence")
+                with(sharedPref.edit()){
+                    remove("is_presenced")
+                    remove("id_presence")
+
+                    apply()
+                }
 
                 parentFragmentManager.commit {
                     replace<HomePresenceStatusEndFragment>(R.id.presence_status_fragment)

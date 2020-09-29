@@ -14,19 +14,20 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.lifecycle.*
+import com.example.anlosia.R
 import com.example.anlosia.repositories.RecordLocationRepo
 import com.example.anlosia.util.Util
 import com.example.anlosia.viewmodel.LocationViewModel
 import com.example.anlosia.model.Location as LocationModel
 import com.google.android.gms.location.*
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.PolyUtil
 import java.util.*
 
 class PresenceStart() : LifecycleService() {
     var counter = 0
     val location = MutableLiveData<Location>()
-    val recordLocationRepo : RecordLocationRepo = RecordLocationRepo()
-    private val TAG = "LocationService"
-    var locationViewModel : LocationViewModel = LocationViewModel()
+
     override fun onCreate() {
         super.onCreate()
 
@@ -38,7 +39,7 @@ class PresenceStart() : LifecycleService() {
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChanel() {
-        val NOTIFICATION_CHANNEL_ID = "com.anlos"
+        val NOTIFICATION_CHANNEL_ID = "com.anlosia"
         val channelName = "Background Service"
         val chan = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
@@ -94,7 +95,7 @@ class PresenceStart() : LifecycleService() {
                         Manifest.permission.ACCESS_COARSE_LOCATION
                     ) == PackageManager.PERMISSION_GRANTED
                 ) {
-                    var polygon: Array<Array<Double>?> = arrayOf()
+                    var polygon = mutableListOf<LatLng>()
                     val sharedPreferences = applicationContext.getSharedPreferences("user", Context.MODE_PRIVATE)
                     var location = sharedPreferences.getString("location", " ")!!
                     location = location.replace("],[", "|")
@@ -103,12 +104,14 @@ class PresenceStart() : LifecycleService() {
                     var n = 0
                     location.split("|").forEach {
                         var latlng = it.split(",")
-                        polygon = Util.append(polygon, arrayOf(latlng[0].toDouble(), latlng[1].toDouble()))
+                        polygon.add(LatLng(latlng[0].toDouble(), latlng[1].toDouble()))
                     }
 
                     val point = client.lastLocation.addOnSuccessListener {
-                        val location = LocationModel(it.latitude, it.longitude)
-                        val isInside = Util.isInsidePolygon(location, polygon)
+                        val point = LatLng(it.latitude, it.longitude)
+                        val isInside: Boolean = PolyUtil.containsLocation(point, polygon, true)
+                        sendNotificationToPresenceOut()
+                        Util.logD(isInside.toString())
                     }
                 }
             }
@@ -130,5 +133,17 @@ class PresenceStart() : LifecycleService() {
             timer!!.cancel()
             timer = null
         }
+    }
+
+    private fun sendNotificationToPresenceOut() {
+        var builder = NotificationCompat.Builder(this, "notification_to_presence_out")
+            .setSmallIcon(R.drawable.ic_baseline_lens_24)
+            .setContentTitle("Hello")
+            .setContentText("dsa")
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .build()
+
+        val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(1, builder)
     }
 }

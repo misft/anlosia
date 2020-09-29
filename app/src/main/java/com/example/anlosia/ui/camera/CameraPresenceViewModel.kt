@@ -24,6 +24,7 @@ class CameraPresenceViewModel : ViewModel() {
     fun getUploadPhotoResponse() : LiveData<UploadResponse> {
         return uploadPhotoResponse
     }
+
     val faceRecognitionResponse = MutableLiveData<FaceRecognitionResponse>()
 
     fun getFaceRecognitionResponse() : LiveData<FaceRecognitionResponse> {
@@ -41,7 +42,6 @@ class CameraPresenceViewModel : ViewModel() {
                 response: Response<UploadResponse>
             ) {
                 uploadPhotoResponse.value = response.body()
-                postFaceRecognition()
             }
         })
     }
