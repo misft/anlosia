@@ -2,6 +2,7 @@ package com.example.anlosia.ui.home
 
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
 import android.location.LocationManager
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -21,6 +22,8 @@ import kotlinx.android.synthetic.main.fragment_presence_status.*
 class HomePresenceStatusFragment : Fragment() {
 
     private var presenceViewModel = PresenceStartViewModel()
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var sharedPreferencesListener: SharedPreferences.OnSharedPreferenceChangeListener
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -31,13 +34,29 @@ class HomePresenceStatusFragment : Fragment() {
 
         val view : View? = activity?.findViewById(R.id.fragment_home)
 
+        val key: String
+
+        sharedPreferences = requireActivity().getSharedPreferences("user", Context.MODE_PRIVATE)
+
+        sharedPreferencesListener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+            if(!sharedPreferences.getBoolean("is_inside", false)) {
+                parentFragmentManager.commit {
+                    replace<HomePresenceStatusDisabledFragment>(R.id.presence_status_fragment)
+                }
+            }
+            if(sharedPreferences.getBoolean("is_inside", false)) {
+                parentFragmentManager.commit {
+                    replace<HomePresenceStatusFragment>(R.id.presence_status_fragment)
+                }
+            }
+        }
+
+        sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferencesListener)
         return root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        val sharedPref = requireActivity().getSharedPreferences("user", Context.MODE_PRIVATE)!!
 
         val manager = requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
 
@@ -46,13 +65,13 @@ class HomePresenceStatusFragment : Fragment() {
                 replace<HomePresenceStatusDisabledFragment>(R.id.presence_status_fragment)
             }
         }
-        else if(!sharedPref.getBoolean("is_inside", false)) {
+        else if(!sharedPreferences.getBoolean("is_inside", false)) {
             parentFragmentManager.commit {
                 replace<HomePresenceStatusDisabledFragment>(R.id.presence_status_fragment)
             }
         }
 
-        if(sharedPref.all["is_presenced"] == 1)  {
+        if(sharedPreferences.all["is_presenced"] == 1)  {
             parentFragmentManager.commit {
                 replace<HomePresenceStatusPresencedFragment>(R.id.presence_status_fragment)
             }

@@ -62,7 +62,8 @@ class HomeFragment : Fragment() {
             else {
                 replace<HomePresenceStatusEndFragment>(R.id.presence_status_fragment, null)
             }
-            commit()
+            addToBackStack(null)
+            commitAllowingStateLoss()
         }
     }
 

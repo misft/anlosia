@@ -18,12 +18,14 @@ import com.example.anlosia.R
 import com.example.anlosia.model.VacationResponse
 import com.example.anlosia.ui.list.vacation.ListVacationActivity
 import com.example.anlosia.util.Util
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.android.synthetic.main.fragment_vacation.*
 import java.util.*
 
 class VacationFragment : Fragment() {
     private lateinit var vacationViewModel: VacationViewModel
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var dialog: BottomSheetDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,11 +33,7 @@ class VacationFragment : Fragment() {
         vacationViewModel = ViewModelProvider(requireActivity(), ViewModelProvider.NewInstanceFactory())[VacationViewModel::class.java]
         sharedPreferences = requireActivity().getSharedPreferences("user", Context.MODE_PRIVATE)
 
-        vacationViewModel.getVacationResponse().observe(requireActivity(), Observer<VacationResponse> {
-            it?.let {
-                Util.logD(it.toString())
-            }
-        })
+        dialog = BottomSheetDialog(requireContext())
     }
 
     override fun onCreateView(
@@ -47,7 +45,19 @@ class VacationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        vacationViewModel.getVacationResponse().observe(requireActivity(), Observer<VacationResponse> {
+            it?.let {
+                val finishedDialog = layoutInflater.inflate(R.layout.finished_sending_vacation, null)
+                dialog.setContentView(finishedDialog)
+                dialog.show()
+            }
+        })
+
         btn_vacation.setOnClickListener {
+            val sendingVacationDialog = layoutInflater.inflate(R.layout.dialog_sending_vacation, null)
+            dialog.setContentView(sendingVacationDialog)
+            dialog.show()
+
             val id_user = sharedPreferences.getInt("id", 0)
             val id_company = sharedPreferences.getInt("id_company", 0)
             val start_day = tx_start.text.toString()

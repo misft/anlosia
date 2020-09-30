@@ -60,11 +60,12 @@ class LoginActivity : AppCompatActivity() {
                                 "profile_pic",
                                 "https://anlosia.xyz/media/" + data.users__profile_pic
                             )
-                            putString("start_work", data.users__start_work)
-                            putString("end_work", data.users__end_work)
-                            putString("location", data.users__location)
+                            putString("start_work", data.users__id_company__start_work)
+                            putString("end_work", data.users__id_company__end_work)
+                            putString("location", data.users__id_company__location)
                             putInt("is_presenced", 0)
-                            apply()
+                            putBoolean("is_location_checked", false)
+                            commit()
                         }
                     }
                     val intent = Intent(this, MainActivity::class.java)
