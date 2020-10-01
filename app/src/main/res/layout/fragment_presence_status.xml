@@ -23,7 +23,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/presence_button_disabled"
             android:fontFamily="@font/roboto_light"
-            android:text="Anda sudah presensi"
+            android:text="Lokasi tidak terdeteksi"
             android:textAllCaps="false"
             android:textColor="@color/text_light" />
     </RelativeLayout>

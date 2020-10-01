@@ -71,6 +71,7 @@ class MainActivity : AppCompatActivity() {
         ) {
             client.lastLocation.addOnSuccessListener { currentLocation ->
                 currentLocation?.let { point ->
+                    Util.logD(point.toString())
                     var polygon = mutableListOf<LatLng>()
                     var location = sharedPreferences.getString("location", " ")!!
                     location = location.replace("],[", "|")

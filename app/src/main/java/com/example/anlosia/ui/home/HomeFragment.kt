@@ -54,34 +54,14 @@ class HomeFragment : Fragment() {
         val datePresence = sharedPref.getString("date_presence", "")
 
         with(childFragmentManager.beginTransaction()) {
-            if(datePresence != "") {
-                val dateNow = SimpleDateFormat("YYYY-MM-dd").parse(Date().toString())
-                val latestPresence = SimpleDateFormat("YYYY-MM-dd").parse(datePresence)
-                if(latestPresence.before(dateNow)) {
-                    if(isPresenced == 1) {
-                        replace<HomePresenceStatusPresencedFragment>(R.id.presence_status_fragment, null)
-                    }
-                    else if(now.after(endWork)) {
-                        replace<HomePresenceStatusEndFragment>(R.id.presence_status_fragment, null)
-                    }
-                    else if(now.before(endWork) && isPresenced == 0) {
-                        replace<HomePresenceStatusFragment>(R.id.presence_status_fragment, null)
-                    }
-                }
-                else {
-                    replace<HomePresenceStatusPresencedFragment>(R.id.presence_status_fragment, null)
-                }
+            if(isPresenced == 1) {
+                replace<HomePresenceStatusPresencedFragment>(R.id.presence_status_fragment, null)
             }
-            else {
-                if(isPresenced == 1) {
-                    replace<HomePresenceStatusPresencedFragment>(R.id.presence_status_fragment, null)
-                }
-                else if(now.after(endWork)) {
-                    replace<HomePresenceStatusEndFragment>(R.id.presence_status_fragment, null)
-                }
-                else if(now.before(endWork) && isPresenced == 0) {
-                    replace<HomePresenceStatusFragment>(R.id.presence_status_fragment, null)
-                }
+            else if(now.after(endWork)) {
+                replace<HomePresenceStatusDisabledFragment>(R.id.presence_status_fragment, null)
+            }
+            else if(now.before(endWork) && isPresenced == 0) {
+                replace<HomePresenceStatusFragment>(R.id.presence_status_fragment, null)
             }
             addToBackStack(null)
             commitAllowingStateLoss()

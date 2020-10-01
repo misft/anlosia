@@ -7,6 +7,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.example.anlosia.R
 import com.example.anlosia.model.PresenceResponse
+import com.example.anlosia.util.Util
 import kotlinx.android.synthetic.main.item_list_presence.view.*
 import org.w3c.dom.Text
 
@@ -24,7 +25,7 @@ class ListPresenceAdapter(private val dataset: List<PresenceResponse>) :
     }
 
     override fun onBindViewHolder(holder: ListPresenceViewHolder, position: Int) {
-        holder.view.findViewById<TextView>(R.id.date_presence).text = dataset[position].date_presence
+        holder.view.findViewById<TextView>(R.id.date_presence).text = Util.dateYMDtoIndo(dataset[position].date_presence)
         holder.view.findViewById<TextView>(R.id.start_presence).text = dataset[position].start_presence
         holder.view.findViewById<TextView>(R.id.end_presence).text = dataset[position].end_presence
     }

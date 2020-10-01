@@ -42,11 +42,12 @@ class ProfileFragment : Fragment() {
                 .into(profile_pic)
         }
         btn_logout.setOnClickListener {
+            requireActivity().stopService(Intent(requireActivity(), PresenceStart::class.java))
+
             with(sharedPreferences.edit()) {
                 clear()
                 apply()
             }
-            requireActivity().stopService(Intent(requireActivity(), PresenceStart::class.java))
             startActivity(Intent(requireActivity(), LoginActivity::class.java))
         }
     }

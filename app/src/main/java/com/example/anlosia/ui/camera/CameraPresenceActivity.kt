@@ -111,9 +111,14 @@ class CameraPresenceActivity : AppCompatActivity() {
 
         val presenceStartObserver = Observer<PresenceResponse> {
             it?.let {
-                sharedPref.edit().putInt("id_presence", it.id).commit()
-                sharedPref.edit().putInt("is_presenced", 1).commit()
+                with(sharedPref.edit()) {
+                    putInt("id_presence", it.id)
+                    putInt("is_presenced", 1)
+
+                    apply()
+                }
                 startActivity(Intent(this, MainActivity::class.java))
+                finish()
             }
         }
 

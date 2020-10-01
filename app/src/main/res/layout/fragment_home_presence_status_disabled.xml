@@ -12,7 +12,7 @@
         android:background="@drawable/presence_button_disabled"
         android:enabled="false"
         android:fontFamily="@font/roboto_light"
-        android:text="Tidak Berada Lokasi"
+        android:text="Jam kerja selesai"
         android:textAllCaps="false"
         android:textColor="@color/text_light" />
 </LinearLayout>
