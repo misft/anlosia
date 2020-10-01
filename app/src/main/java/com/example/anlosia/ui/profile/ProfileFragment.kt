@@ -13,6 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
 import com.example.anlosia.R
+import com.example.anlosia.service.PresenceStart
 import com.example.anlosia.ui.login.LoginActivity
 import kotlinx.android.synthetic.main.fragment_profile.*
 
@@ -45,6 +46,7 @@ class ProfileFragment : Fragment() {
                 clear()
                 apply()
             }
+            requireActivity().stopService(Intent(requireActivity(), PresenceStart::class.java))
             startActivity(Intent(requireActivity(), LoginActivity::class.java))
         }
     }

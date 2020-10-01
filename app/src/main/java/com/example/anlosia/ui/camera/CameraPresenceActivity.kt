@@ -9,6 +9,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
 import android.util.Log
 import android.util.Size
 import android.util.SparseArray
@@ -33,6 +34,7 @@ import com.google.android.gms.vision.face.Face
 import com.google.android.gms.vision.face.FaceDetector
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.android.synthetic.main.activity_camera_presence.*
+import kotlinx.android.synthetic.main.fragment_vacation.*
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -46,7 +48,7 @@ class CameraPresenceActivity : AppCompatActivity() {
     private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
 
-    private lateinit var sharedPref : SharedPreferences
+    private lateinit var sharedPref: SharedPreferences
 
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
@@ -56,7 +58,7 @@ class CameraPresenceActivity : AppCompatActivity() {
 
     private lateinit var dialog: BottomSheetDialog
 
-    override fun onCreate(savedInstanceState:  Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_camera_presence)
 
@@ -68,7 +70,8 @@ class CameraPresenceActivity : AppCompatActivity() {
             startCamera()
         } else {
             ActivityCompat.requestPermissions(
-                this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS)
+                this, REQUIRED_PERMISSIONS, REQUEST_CODE_PERMISSIONS
+            )
         }
 
         //Get shared pref instance
@@ -80,36 +83,45 @@ class CameraPresenceActivity : AppCompatActivity() {
         val start_presence = SimpleDateFormat("HH:mm:ss").format(Date().time)
 
         val uploadPhotoObserver = Observer<UploadResponse> {
-            val dialogSheet = layoutInflater.inflate(R.layout.dialog_face_recognition,null)
+            val dialogSheet = layoutInflater.inflate(R.layout.dialog_face_recognition, null)
             dialog.setContentView(dialogSheet)
             dialog.show()
             cameraPresenceViewModel.postFaceRecognition()
         }
         val faceRecognitionObserver = Observer<FaceRecognitionResponse> {
             it?.let {
-                val dialogSheet = layoutInflater.inflate(R.layout.dialog_presence_start,null)
-                dialog.setContentView(dialogSheet)
-                dialog.show()
-                cameraPresenceViewModel.postPresenceStart(id_user, id_company, date_presence, start_presence)
+                if (it.api_status == 1 && it.id == sharedPref.getInt("id", 0)) {
+                    val dialogSheet = layoutInflater.inflate(R.layout.dialog_presence_start, null)
+                    dialog.setContentView(dialogSheet)
+                    dialog.show()
+
+                    cameraPresenceViewModel.postPresenceStart(
+                        id_user,
+                        id_company,
+                        date_presence,
+                        start_presence
+                    )
+                } else {
+                    val dialogSheet = layoutInflater.inflate(R.layout.dialog_recognition_fail, null)
+                    dialog.setContentView(dialogSheet)
+                    dialog.show()
+                }
             }
         }
 
         val presenceStartObserver = Observer<PresenceResponse> {
             it?.let {
-                val sharedPreferences = this.getSharedPreferences("user", Context.MODE_PRIVATE)
-                with (sharedPreferences.edit()) {
-                    putInt("id_presence", it.id)
-                    putInt("is_presenced", 1)
-
-                    apply()
-                }
-
+                sharedPref.edit().putInt("id_presence", it.id).commit()
+                sharedPref.edit().putInt("is_presenced", 1).commit()
                 startActivity(Intent(this, MainActivity::class.java))
             }
         }
 
         //Initiate view model
-        cameraPresenceViewModel = ViewModelProvider(this, ViewModelProvider.NewInstanceFactory())[CameraPresenceViewModel::class.java]
+        cameraPresenceViewModel = ViewModelProvider(
+            this,
+            ViewModelProvider.NewInstanceFactory()
+        )[CameraPresenceViewModel::class.java]
 
         cameraPresenceViewModel.getUploadPhotoResponse().observe(this, uploadPhotoObserver)
         cameraPresenceViewModel.getFaceRecognitionResponse().observe(this, faceRecognitionObserver)
@@ -119,6 +131,7 @@ class CameraPresenceActivity : AppCompatActivity() {
         camera_capture_button.setOnClickListener {
             takePhoto()
         }
+
         outputDirectory = getOutputDirectory()
 
         cameraExecutor = Executors.newSingleThreadExecutor()
@@ -141,7 +154,8 @@ class CameraPresenceActivity : AppCompatActivity() {
                 .build()
 
             // Select back camera
-            val cameraSelector = CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_FRONT).build()
+            val cameraSelector =
+                CameraSelector.Builder().requireLensFacing(CameraSelector.LENS_FACING_FRONT).build()
 
             try {
                 // Unbind use cases before rebinding
@@ -149,10 +163,11 @@ class CameraPresenceActivity : AppCompatActivity() {
 
                 // Bind use cases to camera
                 camera = cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture)
+                    this, cameraSelector, preview, imageCapture
+                )
 
                 preview?.setSurfaceProvider(viewFinder.createSurfaceProvider(camera?.cameraInfo))
-            } catch(exc: Exception) {
+            } catch (exc: Exception) {
                 Log.e(TAG, "Use case binding failed", exc)
             }
 
@@ -160,66 +175,58 @@ class CameraPresenceActivity : AppCompatActivity() {
     }
 
     private fun takePhoto() {
-        val imageCapture =  imageCapture ?: return
+        val imageCapture = imageCapture ?: return
 
         Log.d(TAG, "Not returning file")
 
         // Create timestamped output file to hold the image
         val photoFile = File(
             outputDirectory,
-            SimpleDateFormat(FILENAME_FORMAT, Locale.US
-            ).format(System.currentTimeMillis()) + ".jpg")
+            SimpleDateFormat(
+                FILENAME_FORMAT, Locale.US
+            ).format(System.currentTimeMillis()) + ".jpg"
+        )
 
         // Create output options object which contains file + metadata
         val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
 
-        // Setup image capture listener which is triggered after photo has
-        // been taken
         imageCapture.takePicture(
-            outputOptions, ContextCompat.getMainExecutor(this), object : ImageCapture.OnImageSavedCallback {
+            outputOptions,
+            ContextCompat.getMainExecutor(this),
+            object : ImageCapture.OnImageSavedCallback {
                 override fun onError(exc: ImageCaptureException) {
                     Log.e(TAG, "Photo capture failed: ${exc.message}", exc)
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    val savedUri = Uri.fromFile(photoFile)
-
                     val bitmap: Bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
-
-                    val detector : FaceDetector = FaceDetector.Builder(applicationContext)
-                        .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
-                        .setTrackingEnabled(false)
-                        .setLandmarkType(FaceDetector.ALL_LANDMARKS)
-                        .build()
-                    val frame: Frame = Frame.Builder().setBitmap(bitmap).build()
-                    val faces:SparseArray<Face> = detector.detect(frame)
-                    detector.release()
-                    val detectedFace: Float = faces[0].isRightEyeOpenProbability
-
-                    Util.logD(detectedFace.toString())
-                    val dialogSheet = layoutInflater.inflate(R.layout.dialog_upload_photo,null)
+                    val dialogSheet = layoutInflater.inflate(R.layout.dialog_upload_photo, null)
                     dialog.setContentView(dialogSheet)
                     dialog.show()
                     cameraPresenceViewModel.postUploadFile(photoFile)
                 }
-            })
+            }
+        )
     }
 
     private fun allPermissionsGranted() = false
 
     fun getOutputDirectory(): File {
         val mediaDir = externalMediaDirs.firstOrNull()?.let {
-            File(it, resources.getString(R.string.app_name)).apply { mkdirs() } }
+            File(it, resources.getString(R.string.app_name)).apply { mkdirs() }
+        }
         return if (mediaDir != null && mediaDir.exists())
             mediaDir else filesDir
     }
 
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults:
-        IntArray) {
+        IntArray
+    ) {
         fun allPermissionsGranted() = REQUIRED_PERMISSIONS.all {
             ContextCompat.checkSelfPermission(
-                baseContext, it) == PackageManager.PERMISSION_GRANTED
+                baseContext, it
+            ) == PackageManager.PERMISSION_GRANTED
         }
 
         if (requestCode == REQUEST_CODE_PERMISSIONS) {
@@ -227,9 +234,11 @@ class CameraPresenceActivity : AppCompatActivity() {
                 Log.d(TAG, "Permisssion granted")
                 startCamera()
             } else {
-                Toast.makeText(this,
+                Toast.makeText(
+                    this,
                     "Permission not granted by the user.",
-                    Toast.LENGTH_SHORT).show()
+                    Toast.LENGTH_SHORT
+                ).show()
                 finish()
             }
         }

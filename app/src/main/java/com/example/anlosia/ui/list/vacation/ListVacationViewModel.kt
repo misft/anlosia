@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.anlosia.model.ListVacationResponse
 import com.example.anlosia.repositories.ListVacationRepo
+import com.example.anlosia.util.Util
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -14,6 +15,10 @@ class ListVacationViewModel : ViewModel() {
 
     val listVacationResponse = MutableLiveData<ListVacationResponse>()
 
+    init {
+        listVacationResponse.value = null
+    }
+
     fun getListVacationResponse() : LiveData<ListVacationResponse> {
         return listVacationResponse
     }
@@ -21,13 +26,14 @@ class ListVacationViewModel : ViewModel() {
     fun getListVacation(id: Int) {
         listVacationRepo.getListVacation(id).enqueue(object: Callback<ListVacationResponse> {
             override fun onFailure(call: Call<ListVacationResponse>, t: Throwable) {
-                TODO("Not yet implemented")
+                Util.logD(t.toString())
             }
 
             override fun onResponse(
                 call: Call<ListVacationResponse>,
                 response: Response<ListVacationResponse>
             ) {
+                Util.logD(response.body().toString())
                 listVacationResponse.value = response.body()
             }
         })

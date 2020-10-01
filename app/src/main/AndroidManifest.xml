@@ -19,7 +19,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.list.presence.ListPresenceActivity"></activity>
+        <activity android:name=".ui.vacation.VacationCamera"></activity>
+        <activity android:name=".ui.list.presence.ListPresenceActivity" />
         <activity
             android:name=".ui.list.vacation.ListVacationActivity"
             android:label="@string/title_activity_list_vacation"

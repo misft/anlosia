@@ -15,6 +15,8 @@ import com.example.anlosia.ui.home.HomeViewModel
 import com.example.anlosia.util.Util
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.android.synthetic.main.activity_login.*
+import java.text.SimpleDateFormat
+import java.util.*
 
 
 class LoginActivity : AppCompatActivity() {
@@ -65,6 +67,7 @@ class LoginActivity : AppCompatActivity() {
                             putString("location", data.users__id_company__location)
                             putInt("is_presenced", 0)
                             putBoolean("is_location_checked", false)
+                            putString("date_presence", "")
                             commit()
                         }
                     }

@@ -10,6 +10,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.anlosia.R
 import com.example.anlosia.model.ListVacationResponse
+import com.example.anlosia.util.Util
+import okhttp3.internal.notify
 
 class ListVacationActivity : AppCompatActivity() {
 
@@ -37,6 +39,7 @@ class ListVacationActivity : AppCompatActivity() {
 
         listVacationViewModel.getListVacationResponse().observe(this, Observer<ListVacationResponse> {
             it?.let {
+                Util.logD(it.results.toString())
                 recyclerView.adapter = ListVacationAdapter(it.results)
             }
         })

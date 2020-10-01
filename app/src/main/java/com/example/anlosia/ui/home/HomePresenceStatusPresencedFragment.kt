@@ -60,7 +60,7 @@ class HomePresenceStatusPresencedFragment : Fragment() {
                 with(sharedPref.edit()){
                     remove("is_presenced")
                     remove("id_presence")
-
+                    putString("date_presence", it.date_presence)
                     apply()
                 }
 

@@ -15,13 +15,13 @@ interface ApiService {
     fun postPresenceEnd(
         @Path("id") id: Int,
         @Body body: RequestBody
-    ) : Call<PresenceResponse>
+    ): Call<PresenceResponse>
 
     @Multipart
     @POST("upload/")
     fun postUploadFile(
         @Part body: MultipartBody.Part
-    ) : Call<UploadResponse>
+    ): Call<UploadResponse>
 
     @GET("facerecognition/")
     fun postFaceRecognition(): Call<FaceRecognitionResponse>
@@ -29,13 +29,25 @@ interface ApiService {
     @POST("location/")
     fun postRecordLocation(@Body body: RequestBody): Call<RecordLocationResponse>
 
+    @Multipart
     @POST("vacation/")
-    fun postVacation(@Body body: RequestBody): Call<VacationResponse>
+    fun postVacation(
+        @Part fileBody: MultipartBody.Part,
+        @Part id_user: MultipartBody.Part,
+        @Part id_company: MultipartBody.Part,
+        @Part start_day: MultipartBody.Part,
+        @Part end_day: MultipartBody.Part,
+        @Part vacation_type: MultipartBody.Part,
+        @Part message: MultipartBody.Part
+    ): Call<VacationResponse>
 
-    @GET("vacation")
+    @GET("vacation/")
     fun getListVacation(@Query("id_user") id: Int): Call<ListVacationResponse>
 
     @GET("presence/")
-    fun getListPresence(@Query("id_user") id: Int) : Call<ListPresenceResponse>
+    fun getListPresence(@Query("id_user") id: Int): Call<ListPresenceResponse>
+
+    @POST("p/")
+    fun postIsPresenced(@Body body: RequestBody) : Call<IsPresencedResponse>
 
 }

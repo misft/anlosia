@@ -3,6 +3,7 @@ package com.example.anlosia.model
 data class LoginResponseUsersData(
     val id: Int,
     val users__id_company: Int,
+    val users__id_company__nane: String,
     val username: String,
     val password: String,
     val email: String,

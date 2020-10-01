@@ -17,5 +17,14 @@
             android:text="Mulai Presensi"
             android:textAllCaps="false"
             android:textColor="@color/text_light" />
+        <Button
+            android:id="@+id/btn_presence_disabled"
+            android:layout_width="175dp"
+            android:layout_height="wrap_content"
+            android:background="@drawable/presence_button_disabled"
+            android:fontFamily="@font/roboto_light"
+            android:text="Anda sudah presensi"
+            android:textAllCaps="false"
+            android:textColor="@color/text_light" />
     </RelativeLayout>
 </LinearLayout>

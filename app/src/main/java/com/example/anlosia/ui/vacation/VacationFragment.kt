@@ -4,28 +4,38 @@ import VacationViewModel
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
+import android.net.Uri
 import android.os.Bundle
-import androidx.fragment.app.Fragment
+import android.provider.MediaStore
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.DatePicker
 import android.widget.RadioButton
-import androidx.core.view.get
-import androidx.core.widget.addTextChangedListener
+import androidx.core.net.toFile
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.anlosia.R
 import com.example.anlosia.model.VacationResponse
 import com.example.anlosia.ui.list.vacation.ListVacationActivity
 import com.example.anlosia.util.Util
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.android.synthetic.main.fragment_vacation.*
+import okhttp3.internal.wait
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
+import java.io.OutputStream
 import java.util.*
+
 
 class VacationFragment : Fragment() {
     private lateinit var vacationViewModel: VacationViewModel
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var dialog: BottomSheetDialog
+    private lateinit var fileAttachment: File
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -45,13 +55,102 @@ class VacationFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        attachment_preview.setImageURI(null)
+
         vacationViewModel.getVacationResponse().observe(requireActivity(), Observer<VacationResponse> {
             it?.let {
-                val finishedDialog = layoutInflater.inflate(R.layout.finished_sending_vacation, null)
-                dialog.setContentView(finishedDialog)
-                dialog.show()
+                val vacationDialog = BottomSheetDialog(requireContext())
+                val finishedDialog = layoutInflater.inflate(R.layout.dialog_finished_sending_vacation_success, null)
+                vacationDialog.setContentView(finishedDialog)
+                vacationDialog.show()
             }
         })
+
+        val calendar = Calendar.getInstance()
+        tx_start.setOnClickListener {
+            tx_start.requestFocus()
+        }
+        tx_end.setOnClickListener {
+            tx_end.requestFocus()
+        }
+        tx_start.setOnFocusChangeListener(object: View.OnFocusChangeListener {
+            override fun onFocusChange(v: View?, hasFocus: Boolean) {
+                if(hasFocus) {
+                    val dialogInflater = layoutInflater.inflate(R.layout.dialog_date_picker, null)
+                    dialog.setContentView(dialogInflater)
+                    val datePicker = dialog.findViewById<DatePicker>(R.id.date_picker)!!
+                    datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), object: DatePicker.OnDateChangedListener {
+                        override fun onDateChanged(
+                            view: DatePicker?,
+                            year: Int,
+                            monthOfYear: Int,
+                            dayOfMonth: Int
+                        ) {
+                            var _month = monthOfYear + 1
+                            var month : String
+                            if(_month.toString().length == 1) {
+                                month = "0${_month}"
+                            }
+                            else {
+                                month = _month.toString()
+                            }
+                            var _day = dayOfMonth
+                            var day: String
+                            if(_day.toString().length == 1) {
+                                day = "0${_day}"
+                            }
+                            else {
+                                day = _day.toString()
+                            }
+                            tx_start.setText("$year-$month-$day")
+                        }
+                    })
+                    dialog.show()
+                }
+            }
+        })
+
+        tx_end.setOnFocusChangeListener(object: View.OnFocusChangeListener {
+            override fun onFocusChange(v: View?, hasFocus: Boolean) {
+                if(hasFocus) {
+                    val dialogInflater = layoutInflater.inflate(R.layout.dialog_date_picker, null)
+                    dialog.setContentView(dialogInflater)
+                    val datePicker = dialog.findViewById<DatePicker>(R.id.date_picker)!!
+                    datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), object: DatePicker.OnDateChangedListener {
+                        override fun onDateChanged(
+                            view: DatePicker?,
+                            year: Int,
+                            monthOfYear: Int,
+                            dayOfMonth: Int
+                        ) {
+                            var _month = monthOfYear + 1
+                            var month : String
+                            if(_month.toString().length == 1) {
+                                month = "0${_month}"
+                            }
+                            else {
+                                month = _month.toString()
+                            }
+                            var _day = dayOfMonth
+                            var day: String
+                            if(_day.toString().length == 1) {
+                                day = "0${_day}"
+                            }
+                            else {
+                                day = _day.toString()
+                            }
+                            tx_end.setText("$year-$month-$day")
+                        }
+                    })
+                    dialog.show()
+                }
+            }
+        })
+
+        btn_attachment.setOnClickListener {
+            startActivityForResult(Intent(requireActivity(), VacationCamera::class.java), 200)
+        }
 
         btn_vacation.setOnClickListener {
             val sendingVacationDialog = layoutInflater.inflate(R.layout.dialog_sending_vacation, null)
@@ -63,15 +162,27 @@ class VacationFragment : Fragment() {
             val start_day = tx_start.text.toString()
             val end_day = tx_end.text.toString()
             val selected = vacation_type.checkedRadioButtonId
-            val radio: RadioButton = vacation_type.findViewById(selected)
-            val vacation_type = radio.text.toString().toUpperCase(Locale.ROOT)
+            val radio: RadioButton? = vacation_type.findViewById(selected)
+            val vacation_type = radio?.text.toString().toUpperCase(Locale.ROOT)
             val message = tx_message.text.toString()
+            val attachment = fileAttachment
 
-            vacationViewModel.postVacation(id_user, id_company, start_day, end_day, vacation_type, message)
+            vacationViewModel.postVacation(id_user, id_company, start_day, end_day, vacation_type, message, attachment)
         }
 
         tx_list_vacation.setOnClickListener {
             startActivity(Intent(requireActivity(), ListVacationActivity::class.java))
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        if(requestCode == 200) {
+            data?.let {
+                attachment_preview.setImageURI(Uri.parse(data.getStringExtra("attachment")))
+                fileAttachment = Uri.parse(data.getStringExtra("attachment")).toFile()
+            }
         }
     }
 }
