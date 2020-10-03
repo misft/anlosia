@@ -39,6 +39,13 @@ class HomePresenceStatusFragment : Fragment() {
     private lateinit var observePresenceState: Observer<Boolean>
     private lateinit var observeIsPresenced: Observer<IsPresencedResponse>
 
+    private lateinit var dialog: BottomSheetDialog
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+        dialog = BottomSheetDialog(context)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -57,7 +64,6 @@ class HomePresenceStatusFragment : Fragment() {
 
         observePresenceState = Observer<Boolean> {
             it?.let {
-                Util.logD(it.toString())
                 if(it) {
                     root.findViewById<Button>(R.id.btn_presence_start).visibility = View.VISIBLE
                     root.findViewById<Button>(R.id.btn_presence_disabled).visibility = View.GONE
@@ -68,11 +74,20 @@ class HomePresenceStatusFragment : Fragment() {
                 }
             }
         }
+        observeIsPresenced = Observer<IsPresencedResponse> {
+            it?.let {
+                dialog.dismiss()
+                if(it.api_status == 1) {
+                    startActivity(Intent(activity, CameraPresenceActivity::class.java))
+                }
+                else {
+                    dialog.setContentView(R.layout.dialog_is_presenced)
+                    dialog.show()
+                }
+            }
+        }
 
-        val id_user = sharedPreferences.getInt("id", 0)
-        val date_presence = SimpleDateFormat("YYYY-MM-dd").format(Date().time)
-        isPresencedViewModel.postIsPresenced(id_user, date_presence)
-
+        isPresencedViewModel.getIsPresenced().observe(requireActivity(), observeIsPresenced)
         presenceStateAllowedViewModel.getIsAllowed().observe(requireActivity(), observePresenceState)
 
         sharedPreferencesListener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
@@ -103,22 +118,29 @@ class HomePresenceStatusFragment : Fragment() {
         return root
     }
 
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        if(dialog.isShowing)
+            dialog.dismiss()
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         btn_presence_start.setOnClickListener {
             val id_user = sharedPreferences.getInt("id", 0)
             val date_presence = SimpleDateFormat("YYYY-MM-dd").format(Date().time)
+            dialog.dismiss()
+            dialog.setContentView(R.layout.dialog_checking_presence)
+            dialog.show()
             isPresencedViewModel.postIsPresenced(id_user, date_presence)
-
-            if(isPresencedViewModel.getIsPresenced().value?.api_status == 1) {
-                startActivity(Intent(activity, CameraPresenceActivity::class.java))
-            }
-            else {
-                val dialog = BottomSheetDialog(requireContext())
-                dialog.setContentView(R.layout.dialog_is_presenced)
-                dialog.show()
-            }
         }
     }
 }
+
+
+
+
+
+
+

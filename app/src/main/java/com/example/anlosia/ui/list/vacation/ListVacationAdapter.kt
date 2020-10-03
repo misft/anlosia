@@ -18,6 +18,7 @@ class ListVacationAdapter(private val myDataset: List<VacationResponse>) : Recyc
 
         return ListVacationViewHolder(view)
     }
+
     override fun onBindViewHolder(holder: ListVacationViewHolder, position: Int) {
         holder.view.findViewById<TextView>(R.id.start_day).text = Util.dateYMDtoIndo(myDataset[position].start_day)
         holder.view.findViewById<TextView>(R.id.end_day).text = Util.dateYMDtoIndo(myDataset[position].end_day)
@@ -25,5 +26,6 @@ class ListVacationAdapter(private val myDataset: List<VacationResponse>) : Recyc
         holder.view.findViewById<TextView>(R.id.vacation_status).text = myDataset[position].vacation_status
         holder.view.findViewById<TextView>(R.id.message).text = myDataset[position].message
     }
+
     override fun getItemCount() = myDataset.size
 }

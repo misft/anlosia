@@ -36,20 +36,33 @@ class VacationFragment : Fragment() {
     private lateinit var sharedPreferences: SharedPreferences
     private lateinit var dialog: BottomSheetDialog
     private lateinit var fileAttachment: File
+    private lateinit var vacationDialog: BottomSheetDialog
+    private lateinit var calendar: Calendar
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
 
         vacationViewModel = ViewModelProvider(requireActivity(), ViewModelProvider.NewInstanceFactory())[VacationViewModel::class.java]
-        sharedPreferences = requireActivity().getSharedPreferences("user", Context.MODE_PRIVATE)
 
+        sharedPreferences = requireActivity().getSharedPreferences("user", Context.MODE_PRIVATE)
         dialog = BottomSheetDialog(requireContext())
+        vacationDialog = BottomSheetDialog(requireContext())
+        calendar = Calendar.getInstance()
     }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        vacationViewModel.getVacationResponse().observe(requireActivity(), Observer<VacationResponse> {
+            it?.let {
+                dialog.dismiss()
+                val finishedDialog = inflater.inflate(R.layout.dialog_finished_sending_vacation_success, null)
+                dialog.setContentView(finishedDialog)
+                dialog.show()
+            }
+        })
+
         return inflater.inflate(R.layout.fragment_vacation, container, false)
     }
 
@@ -58,28 +71,20 @@ class VacationFragment : Fragment() {
 
         attachment_preview.setImageURI(null)
 
-        vacationViewModel.getVacationResponse().observe(requireActivity(), Observer<VacationResponse> {
-            it?.let {
-                val vacationDialog = BottomSheetDialog(requireContext())
-                val finishedDialog = layoutInflater.inflate(R.layout.dialog_finished_sending_vacation_success, null)
-                vacationDialog.setContentView(finishedDialog)
-                vacationDialog.show()
-            }
-        })
-
-        val calendar = Calendar.getInstance()
         tx_start.setOnClickListener {
             tx_start.requestFocus()
         }
         tx_end.setOnClickListener {
             tx_end.requestFocus()
         }
+
         tx_start.setOnFocusChangeListener(object: View.OnFocusChangeListener {
             override fun onFocusChange(v: View?, hasFocus: Boolean) {
                 if(hasFocus) {
                     val dialogInflater = layoutInflater.inflate(R.layout.dialog_date_picker, null)
                     dialog.setContentView(dialogInflater)
                     val datePicker = dialog.findViewById<DatePicker>(R.id.date_picker)!!
+                    datePicker.minDate = Date().time
                     datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), object: DatePicker.OnDateChangedListener {
                         override fun onDateChanged(
                             view: DatePicker?,
@@ -117,6 +122,7 @@ class VacationFragment : Fragment() {
                     val dialogInflater = layoutInflater.inflate(R.layout.dialog_date_picker, null)
                     dialog.setContentView(dialogInflater)
                     val datePicker = dialog.findViewById<DatePicker>(R.id.date_picker)!!
+                    datePicker.minDate = Date().time
                     datePicker.init(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DATE), object: DatePicker.OnDateChangedListener {
                         override fun onDateChanged(
                             view: DatePicker?,
@@ -173,6 +179,12 @@ class VacationFragment : Fragment() {
         tx_list_vacation.setOnClickListener {
             startActivity(Intent(requireActivity(), ListVacationActivity::class.java))
         }
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        if(dialog.isShowing)
+            dialog.dismiss()
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

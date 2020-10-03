@@ -51,6 +51,7 @@
             android:name=".service.PresenceStart"
             android:enabled="true"
             android:exported="true"
+            android:stopWithTask="true"
             android:permission="android.permission.ACCESS_FINE_LOCATION" />
 
         <receiver

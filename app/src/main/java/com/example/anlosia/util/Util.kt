@@ -67,7 +67,7 @@ object Util {
         val month = parseMonthToString(_date[1])
         val day = parseDayToString(date)
 
-        return "${day} ${month} ${year}"
+        return "${_date[2]} ${month} ${year}"
     }
 
     fun parseMonthToString(month: String): String {
@@ -88,7 +88,7 @@ object Util {
 
     fun parseDayToString(date: String): String {
         val sdf = SimpleDateFormat("EEEE")
-        val _date = SimpleDateFormat("YYYY-M-d").parse(date)
+        val _date = SimpleDateFormat("YYYY-MM-dd").parse(date)
         val day: String = sdf.format(_date)
 
         if(day == "Monday") return "Senin"

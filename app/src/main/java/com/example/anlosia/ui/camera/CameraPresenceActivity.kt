@@ -41,7 +41,6 @@ import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-
 class CameraPresenceActivity : AppCompatActivity() {
     private var preview: Preview? = null
     private var imageCapture: ImageCapture? = null
@@ -253,6 +252,11 @@ class CameraPresenceActivity : AppCompatActivity() {
         super.onDestroy()
 
         cameraExecutor.shutdown()
+    }
+
+    override fun onBackPressed() {
+        super.onBackPressed()
+        finish()
     }
 
     companion object {

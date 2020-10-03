@@ -49,6 +49,7 @@ class ProfileFragment : Fragment() {
                 apply()
             }
             startActivity(Intent(requireActivity(), LoginActivity::class.java))
+            requireActivity().finish()
         }
     }
 }

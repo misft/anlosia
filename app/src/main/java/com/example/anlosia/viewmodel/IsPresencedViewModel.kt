@@ -20,6 +20,7 @@ class IsPresencedViewModel: ViewModel() {
     init {
         isPresenced.value = null
     }
+
     fun getIsPresenced(): LiveData<IsPresencedResponse> {
         return isPresenced
     }

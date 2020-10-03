@@ -1,3 +1,3 @@
 package com.example.anlosia.model
 
-data class IsPresencedResponse(val api_status: Int)
+data class IsPresencedResponse(val api_status: Int, val id: Int)

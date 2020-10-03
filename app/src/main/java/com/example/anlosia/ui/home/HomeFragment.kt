@@ -27,6 +27,15 @@ class HomeFragment : Fragment() {
 
     private lateinit var client: FusedLocationProviderClient
     private lateinit var sharedPref: SharedPreferences
+    private lateinit var fragmentActivity: FragmentActivity
+
+    override fun onAttach(context: Context) {
+        super.onAttach(context)
+
+        fragmentActivity = requireActivity()
+        client = LocationServices.getFusedLocationProviderClient(requireActivity())
+        sharedPref = fragmentActivity.getSharedPreferences("user", Context.MODE_PRIVATE)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,10 +44,7 @@ class HomeFragment : Fragment() {
     ): View? {
         val root = inflater.inflate(R.layout.fragment_home, container, false)
 
-        sharedPref = requireActivity().getSharedPreferences("user", Context.MODE_PRIVATE)
         val view: View? = activity?.findViewById(R.id.container)
-
-        client = LocationServices.getFusedLocationProviderClient(requireActivity())
 
         refreshFragment()
 
@@ -66,7 +72,6 @@ class HomeFragment : Fragment() {
             addToBackStack(null)
             commitAllowingStateLoss()
         }
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
