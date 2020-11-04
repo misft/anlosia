@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import com.bumptech.glide.Glide
@@ -19,13 +20,15 @@ import kotlinx.android.synthetic.main.fragment_profile.*
 
 class ProfileFragment : Fragment() {
     private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var fragmentActivity: FragmentActivity
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
-        sharedPreferences = requireActivity().getSharedPreferences("user", Context.MODE_PRIVATE)
+        fragmentActivity = requireActivity()
+        sharedPreferences = fragmentActivity.getSharedPreferences("user", Context.MODE_PRIVATE)
         return inflater.inflate(R.layout.fragment_profile, container, false)
     }
 
@@ -42,14 +45,14 @@ class ProfileFragment : Fragment() {
                 .into(profile_pic)
         }
         btn_logout.setOnClickListener {
-            requireActivity().stopService(Intent(requireActivity(), PresenceStart::class.java))
+            fragmentActivity.stopService(Intent(fragmentActivity, PresenceStart::class.java))
 
             with(sharedPreferences.edit()) {
                 clear()
-                apply()
+                commit()
             }
-            startActivity(Intent(requireActivity(), LoginActivity::class.java))
-            requireActivity().finish()
+            startActivity(Intent(fragmentActivity, LoginActivity::class.java))
+            fragmentActivity.finish()
         }
     }
 }

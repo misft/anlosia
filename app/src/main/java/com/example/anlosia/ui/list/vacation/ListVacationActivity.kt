@@ -3,6 +3,8 @@ package com.example.anlosia.ui.list.vacation
 import android.content.Context
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.view.View
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -21,6 +23,7 @@ class ListVacationActivity : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var listVacationAdapter: RecyclerView.Adapter<*>
     private lateinit var listVacationManager: RecyclerView.LayoutManager
+    private lateinit var progressBar: ProgressBar
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -32,6 +35,8 @@ class ListVacationActivity : AppCompatActivity() {
         recyclerView = findViewById(R.id.rc_list_vacation)
         listVacationManager = LinearLayoutManager(this)
         listVacationAdapter = ListVacationAdapter(listOf())
+        progressBar = findViewById(R.id.loading)
+        progressBar.visibility = View.VISIBLE
 
         recyclerView.apply {
             layoutManager = listVacationManager
@@ -39,7 +44,7 @@ class ListVacationActivity : AppCompatActivity() {
 
         listVacationViewModel.getListVacationResponse().observe(this, Observer<ListVacationResponse> {
             it?.let {
-                Util.logD(it.results.toString())
+                progressBar.visibility = View.GONE
                 recyclerView.adapter = ListVacationAdapter(it.results)
             }
         })

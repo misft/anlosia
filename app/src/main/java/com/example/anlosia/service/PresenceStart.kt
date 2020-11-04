@@ -29,8 +29,10 @@ import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.lang.NumberFormatException
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.system.exitProcess
 
 class PresenceStart() : LifecycleService() {
     val location = MutableLiveData<Location>()
@@ -120,7 +122,12 @@ class PresenceStart() : LifecycleService() {
 
                     location.split("|").forEach {
                         var latlng = it.split(",")
-                        polygon.add(LatLng(latlng[0].toDouble(), latlng[1].toDouble()))
+                        try {
+                            polygon.add(LatLng(latlng[0].toDouble(), latlng[1].toDouble()))
+                        }
+                        catch (e: NumberFormatException) {
+                            stopForeground(true)
+                        }
                     }
 
                     val point = LatLng(this.latitude, this.longitude)

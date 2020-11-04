@@ -51,6 +51,21 @@ class HomePresenceStatusPresencedFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         val sharedPref = requireActivity().getSharedPreferences("user", Context.MODE_PRIVATE)
 
+        btn_presence_end.setOnClickListener {
+            val id_presence = sharedPref.getInt("id_presence", 0)
+            val id_user = sharedPref.getInt("id", 0)
+            val id_company = sharedPref.getInt("id_company", 0)
+            val myDate = Date()
+            val date_presence = SimpleDateFormat("YYYY-MM-dd").format(myDate)
+            val end_presence = SimpleDateFormat("HH:mm:ss").format(myDate)
+
+            presenceEndViewModel.postPresence(id_presence, id_user, id_company, date_presence, end_presence)
+        }
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+
         presenceEndViewModel.getPresence().observe(requireActivity(), Observer<PresenceResponse> {
             it?.let {
                 btn_presence_end.isEnabled = false
@@ -69,17 +84,6 @@ class HomePresenceStatusPresencedFragment : Fragment() {
                 }
             }
         })
-
-        btn_presence_end.setOnClickListener {
-            val id_presence = sharedPref.getInt("id_presence", 0)
-            val id_user = sharedPref.getInt("id", 0)
-            val id_company = sharedPref.getInt("id_company", 0)
-            val myDate = Date()
-            val date_presence = SimpleDateFormat("YYYY-MM-dd").format(myDate)
-            val end_presence = SimpleDateFormat("HH:mm:ss").format(myDate)
-
-            presenceEndViewModel.postPresence(id_presence, id_user, id_company, date_presence, end_presence)
-        }
     }
 
     private fun startRecordLocation() {

@@ -170,6 +170,7 @@ class VacationCamera : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
+        finish()
     }
 
     companion object {

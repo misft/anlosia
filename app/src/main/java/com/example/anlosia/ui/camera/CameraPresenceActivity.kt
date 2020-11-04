@@ -7,12 +7,13 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Bundle
-import android.provider.MediaStore
+import android.util.AttributeSet
 import android.util.Log
 import android.util.Size
 import android.util.SparseArray
+import android.view.View
+import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
@@ -30,11 +31,11 @@ import com.example.anlosia.util.Util
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.vision.Frame
+import com.google.android.gms.vision.MultiProcessor
 import com.google.android.gms.vision.face.Face
 import com.google.android.gms.vision.face.FaceDetector
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.android.synthetic.main.activity_camera_presence.*
-import kotlinx.android.synthetic.main.fragment_vacation.*
 import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
@@ -44,18 +45,14 @@ import java.util.concurrent.Executors
 class CameraPresenceActivity : AppCompatActivity() {
     private var preview: Preview? = null
     private var imageCapture: ImageCapture? = null
-    private var imageAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
-
     private lateinit var sharedPref: SharedPreferences
-
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
-
     private var cameraPresenceViewModel = CameraPresenceViewModel()
     private lateinit var client: FusedLocationProviderClient
-
     private lateinit var dialog: BottomSheetDialog
+    private lateinit var state: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,6 +60,7 @@ class CameraPresenceActivity : AppCompatActivity() {
 
         client = LocationServices.getFusedLocationProviderClient(applicationContext)
         dialog = BottomSheetDialog(this)
+        state = findViewById<TextView>(R.id.camera_presence_state)
 
         // Request camera permissions
         if (allPermissionsGranted()) {
@@ -89,17 +87,18 @@ class CameraPresenceActivity : AppCompatActivity() {
         }
         val faceRecognitionObserver = Observer<FaceRecognitionResponse> {
             it?.let {
-                if (it.api_status == 1 && it.id == sharedPref.getInt("id", 0)) {
+                if (it.api_status == 1) {
                     val dialogSheet = layoutInflater.inflate(R.layout.dialog_presence_start, null)
+                    dialogSheet.findViewById<TextView>(R.id.face_recognition_result).text = "Hai, ${sharedPref.getString("name", "")}, sedang memulai presensi..."
                     dialog.setContentView(dialogSheet)
                     dialog.show()
 
-                    cameraPresenceViewModel.postPresenceStart(
-                        id_user,
-                        id_company,
-                        date_presence,
-                        start_presence
-                    )
+//                    cameraPresenceViewModel.postPresenceStart(
+//                        id_user,
+//                        id_company,
+//                        date_presence,
+//                        start_presence
+//                    )
                 } else {
                     val dialogSheet = layoutInflater.inflate(R.layout.dialog_recognition_fail, null)
                     dialog.setContentView(dialogSheet)
@@ -204,10 +203,33 @@ class CameraPresenceActivity : AppCompatActivity() {
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
                     val bitmap: Bitmap = BitmapFactory.decodeFile(photoFile.absolutePath)
-                    val dialogSheet = layoutInflater.inflate(R.layout.dialog_upload_photo, null)
-                    dialog.setContentView(dialogSheet)
-                    dialog.show()
-                    cameraPresenceViewModel.postUploadFile(photoFile)
+
+                    if(state.text == "Ambil foto") {
+                        state.text = "Pejamkan mata"
+                    }
+                    else if(state.text == "Pejamkan mata") {
+                        val faceDetector: FaceDetector = FaceDetector.Builder(applicationContext)
+                            .setTrackingEnabled(false)
+                            .setLandmarkType(FaceDetector.ALL_LANDMARKS)
+                            .setClassificationType(FaceDetector.ALL_CLASSIFICATIONS)
+                            .build()
+                        val frame: Frame = Frame.Builder().setBitmap(bitmap).build()
+                        val faces: SparseArray<Face> = faceDetector.detect(frame)
+                        for (i in 0 until faces.size()) {
+                            val face = faces.valueAt(i)
+                            Util.logD(face.isLeftEyeOpenProbability.toString())
+                            if(face.isLeftEyeOpenProbability <= 0.1 && face.isRightEyeOpenProbability <= 0.1) {
+                                state.text = "Ambil foto lagi"
+                            }
+                        }
+                    }
+                    else if(state.text == "Ambil foto lagi") {
+                        state.text == "Ambil foto"
+                        val dialogSheet = layoutInflater.inflate(R.layout.dialog_upload_photo, null)
+                        dialog.setContentView(dialogSheet)
+                        dialog.show()
+                        cameraPresenceViewModel.postUploadFile(photoFile)
+                    }
                 }
             }
         )
@@ -250,14 +272,14 @@ class CameraPresenceActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-
         cameraExecutor.shutdown()
+        finish()
     }
 
     override fun onBackPressed() {
-        super.onBackPressed()
         finish()
     }
+
 
     companion object {
         private const val TAG = "CameraXBasic"

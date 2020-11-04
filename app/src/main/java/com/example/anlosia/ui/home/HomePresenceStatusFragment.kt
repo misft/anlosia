@@ -12,6 +12,7 @@ import android.widget.Button
 import android.widget.Toast
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.commit
 import androidx.fragment.app.replace
 import androidx.lifecycle.Observer
@@ -38,7 +39,7 @@ class HomePresenceStatusFragment : Fragment() {
     private lateinit var isPresencedViewModel: IsPresencedViewModel
     private lateinit var observePresenceState: Observer<Boolean>
     private lateinit var observeIsPresenced: Observer<IsPresencedResponse>
-
+    private lateinit var fragmentActivity: FragmentActivity
     private lateinit var dialog: BottomSheetDialog
 
     override fun onAttach(context: Context) {
@@ -49,10 +50,11 @@ class HomePresenceStatusFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        manager = requireActivity().getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        sharedPreferences = requireActivity().getSharedPreferences("user", Context.MODE_PRIVATE)
-        presenceStateAllowedViewModel = ViewModelProvider(requireActivity(), ViewModelProvider.NewInstanceFactory())[PresenceStateAllowedViewModel::class.java]
-        isPresencedViewModel = ViewModelProvider(requireActivity(), ViewModelProvider.NewInstanceFactory())[IsPresencedViewModel::class.java]
+        fragmentActivity = requireActivity()
+        manager = fragmentActivity.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        sharedPreferences = fragmentActivity.getSharedPreferences("user", Context.MODE_PRIVATE)
+        presenceStateAllowedViewModel = ViewModelProvider(fragmentActivity, ViewModelProvider.NewInstanceFactory())[PresenceStateAllowedViewModel::class.java]
+        isPresencedViewModel = ViewModelProvider(fragmentActivity, ViewModelProvider.NewInstanceFactory())[IsPresencedViewModel::class.java]
     }
 
     override fun onCreateView(
@@ -61,34 +63,7 @@ class HomePresenceStatusFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val root = inflater.inflate(R.layout.fragment_presence_status, container, false)
-
-        observePresenceState = Observer<Boolean> {
-            it?.let {
-                if(it) {
-                    root.findViewById<Button>(R.id.btn_presence_start).visibility = View.VISIBLE
-                    root.findViewById<Button>(R.id.btn_presence_disabled).visibility = View.GONE
-                }
-                else {
-                    root.findViewById<Button>(R.id.btn_presence_start).visibility = View.GONE
-                    root.findViewById<Button>(R.id.btn_presence_disabled).visibility = View.VISIBLE
-                }
-            }
-        }
-        observeIsPresenced = Observer<IsPresencedResponse> {
-            it?.let {
-                dialog.dismiss()
-                if(it.api_status == 1) {
-                    startActivity(Intent(activity, CameraPresenceActivity::class.java))
-                }
-                else {
-                    dialog.setContentView(R.layout.dialog_is_presenced)
-                    dialog.show()
-                }
-            }
-        }
-
-        isPresencedViewModel.getIsPresenced().observe(requireActivity(), observeIsPresenced)
-        presenceStateAllowedViewModel.getIsAllowed().observe(requireActivity(), observePresenceState)
+        val view : View? = activity?.findViewById(R.id.fragment_home)
 
         sharedPreferencesListener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
             if (!manager.isProviderEnabled( LocationManager.GPS_PROVIDER)) {
@@ -103,8 +78,7 @@ class HomePresenceStatusFragment : Fragment() {
         }
         sharedPreferences.registerOnSharedPreferenceChangeListener(sharedPreferencesListener)
 
-
-        if (!manager.isProviderEnabled( LocationManager.GPS_PROVIDER)) {
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             presenceStateAllowedViewModel.unsetAllowed()
         }
         if(!sharedPreferences.getBoolean("is_inside", false)) {
@@ -114,14 +88,7 @@ class HomePresenceStatusFragment : Fragment() {
             presenceStateAllowedViewModel.setAllowed()
         }
 
-        val view : View? = activity?.findViewById(R.id.fragment_home)
         return root
-    }
-
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-        if(dialog.isShowing)
-            dialog.dismiss()
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -136,11 +103,44 @@ class HomePresenceStatusFragment : Fragment() {
             isPresencedViewModel.postIsPresenced(id_user, date_presence)
         }
     }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        if(dialog.isShowing)
+            dialog.dismiss()
+
+        presenceStateAllowedViewModel.getIsAllowed().removeObservers(this)
+        observePresenceState = Observer<Boolean> {
+            it?.let {
+                if(it) {
+                    view?.findViewById<Button>(R.id.btn_presence_start)!!.visibility = View.VISIBLE
+                    view?.findViewById<Button>(R.id.btn_presence_disabled)!!.visibility = View.GONE
+                }
+                else {
+                    view?.findViewById<Button>(R.id.btn_presence_start)!!.visibility = View.GONE
+                    view?.findViewById<Button>(R.id.btn_presence_disabled)!!.visibility = View.VISIBLE
+                }
+            }
+        }
+        isPresencedViewModel.getIsPresenced().removeObservers(this)
+        observeIsPresenced = Observer<IsPresencedResponse> {
+            it?.let {
+                dialog.dismiss()
+                if(it.api_status == 1) {
+                    startActivity(Intent(fragmentActivity, CameraPresenceActivity::class.java))
+                }
+                else {
+                    dialog.setContentView(R.layout.dialog_is_presenced)
+                    dialog.show()
+                }
+                isPresencedViewModel.isPresenced.value = null
+            }
+        }
+
+        isPresencedViewModel.getIsPresenced().observe(viewLifecycleOwner, observeIsPresenced)
+        presenceStateAllowedViewModel.getIsAllowed().observe(viewLifecycleOwner, observePresenceState)
+    }
 }
-
-
-
-
 
 
 

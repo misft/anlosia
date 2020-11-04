@@ -14,4 +14,19 @@
         android:text="Presensi Selesai"
         android:textAllCaps="false"
         android:textColor="@color/text_light" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="3.34.0.15"
+        android:textSize="30dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Indrawan Prasetyo"
+        android:textSize="30dp" />
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sedang Presensi"
+        android:textSize="30dp" />
 </LinearLayout>

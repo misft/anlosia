@@ -12,10 +12,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.DatePicker
 import android.widget.RadioButton
+import android.widget.Toast
 import androidx.core.net.toFile
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.bumptech.glide.Glide
 import com.example.anlosia.R
 import com.example.anlosia.model.VacationResponse
 import com.example.anlosia.ui.list.vacation.ListVacationActivity
@@ -171,9 +173,14 @@ class VacationFragment : Fragment() {
             val radio: RadioButton? = vacation_type.findViewById(selected)
             val vacation_type = radio?.text.toString().toUpperCase(Locale.ROOT)
             val message = tx_message.text.toString()
-            val attachment = fileAttachment
+            try {
+                val attachment = fileAttachment
+                vacationViewModel.postVacation(id_user, id_company, start_day, end_day, vacation_type, message, attachment)
+            }
+            catch(e: UninitializedPropertyAccessException) {
+                Toast.makeText(requireContext(), "Anda belum memasang bukti", Toast.LENGTH_SHORT)
+            }
 
-            vacationViewModel.postVacation(id_user, id_company, start_day, end_day, vacation_type, message, attachment)
         }
 
         tx_list_vacation.setOnClickListener {
